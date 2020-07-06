@@ -3,7 +3,7 @@ name: Transformer_v0
 model: video_base
 distortion: sr
 scale: 4
-gpu_ids: [4,5]
+gpu_ids: [2,3]
 
 
 #### datasets
@@ -69,11 +69,11 @@ train:
 
   pixel_criterion: cb
   pixel_weight: 1.0
-  val_freq: !!float 2e3
+  val_freq: !!float 1e3
 
   manual_seed: 0
 
 #### logger
 logger:
   print_freq: 100
-  save_checkpoint_freq: !!float 1e4
+  save_checkpoint_freq: !!float 5e4

@@ -30,6 +30,7 @@ class VideoTestDataset(data.Dataset):
         folder_name = self.folder[index]
         folder1, folder2 = folder_name.split('/')[0], folder_name.split('/')[1]
         img_paths_LQ = glob.glob(osp.join(self.LQ_root, folder1, folder2, '*'))
+        img_paths_LQ = sorted(img_paths_LQ)
         dir = osp.join(self.LQ_root, folder1, folder2)
         img_path_GT = osp.join(self.GT_root, folder1, folder2, 'im4.png')
         #### read img

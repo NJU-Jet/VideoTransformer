@@ -75,13 +75,7 @@ def main():
         
     #create model
     model = create_model(opt) 
-    '''
-    x = torch.randn(4, 7, 3, 64, 112)
-    data = {}
-    data['LQs'] = x
-    model.feed_data(data, False)
-    model.optimize_parameters()
-    '''
+
     #### resume training
     if resume_state:
         logger.info('Resuming training from epoch: {}, iter: {}.'.format(
@@ -96,6 +90,7 @@ def main():
     
     #### training
     logger.info('Start training from epoch: {:d}, iter: {:d}'.format(start_epoch, current_step))
+    psnr_max = 0.0
     for epoch in range(start_epoch, total_epochs + 1):
         for _, train_data in enumerate(train_loader):
             current_step += 1
@@ -153,11 +148,14 @@ def main():
 
             #### save models and training states
             if current_step % opt['logger']['save_checkpoint_freq'] == 0:
-                logger.info('Saving models and training states.')
-                model.save(current_step)
-                model.save_training_state(epoch, current_step)
+                if psnr_total_avg > psnr_max:
+                    logger.info('Saving temporal best models and training states.')
+                    model.save('best')
+                    model.save_training_state(epoch, current_step)
+                    psnr_max = psnr_total_avg
+                    
     logger.info('Saving the final model.')
-    model.save('latest')
+    #model.save('latest')
     logger.info('End of training.')
 
 

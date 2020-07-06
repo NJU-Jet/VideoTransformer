@@ -33,7 +33,7 @@ class Transformer_v0(nn.Module):
         self.tokenizer = StaticTokenizer(nf, L, Cp, CT, input_size)        
 
         #### transform in token space
-        self.transformer = StaticTransformer(CT)
+        self.transformer = StaticTransformer(CT, L)
         
         #### project tokens back to image sapce
         self.projector = StaticProjector(CT, nf)
@@ -234,10 +234,12 @@ class PosEncoder(nn.Module):
 
 
 class StaticTransformer(nn.Module):
-    def __init__(self, CT):   #total_tokens:  frames*L
+    def __init__(self, CT, L):   #total_tokens:  frames*L
         super(StaticTransformer, self).__init__()
+        self.L = L
+        
         #### get attention of all frames, inter fusion
-        self.inter_fusion_conv = nn.Conv1d(CT, CT, 1, 1)
+        self.inter_fusion_conv = nn.Conv1d(CT, 2*L, 1, 1)
 
         #### intra fusion
         self.k_conv = nn.Conv1d(CT, CT//2, 1, 1)
@@ -252,12 +254,11 @@ class StaticTransformer(nn.Module):
         center_frame_token = tokens[:, N//2, :, :]  #(B, CT, L)
         nbr_frame_token = tokens[:, index, :, :]    #(B, CT, L)
         
-        # inter fusion
-        cor = torch.matmul(center_frame_token.permute(0, 2, 1), nbr_frame_token)    #(B, L, L)
-        cor = F.softmax(cor, dim = 2)   #(B, L, L)
-        align = torch.matmul(nbr_frame_token, cor.permute(0, 2, 1)) #(B, CT, L)
-        inter_fusion = center_frame_token + align   #(B, CT, L)
-        inter_fusion = self.inter_fusion_conv(inter_fusion) #(B, CT, L)
+        #inter fusion
+        total_info = torch.cat([center_frame_token, nbr_frame_token], dim=2)#(B, CT, 2L)
+        att = self.inter_fusion_conv(center_frame_token)    #(B, 2L, L)
+        att = F.softmax(att, dim=1)
+        inter_fusion = center_frame_token + torch.matmul(total_info, att)   #(B, CT, L)
 
         # intra fusion
         k = self.k_conv(inter_fusion)   #(B, CT/2, L)
