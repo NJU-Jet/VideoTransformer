@@ -3,7 +3,7 @@ name: Transformer_v0
 model: video_base
 distortion: sr
 scale: 4
-gpu_ids: [2,3]
+gpu_ids: [4,5]
 
 
 #### datasets
@@ -43,6 +43,7 @@ network_G:
   nf: 64
   nframes: 7
   groups: 7
+  L: 8
   front_RBs: 5
   back_RBs: 10
 
@@ -54,7 +55,7 @@ path:
   
 #### training settings: learning rate scheme, loss
 train:
-  lr_G: !!float 6e-4
+  lr_G: !!float 1e-3
   lr_scheme: CosineAnnealingLR_Restart
   beta1: 0.9
   beta2: 0.99
@@ -76,4 +77,4 @@ train:
 #### logger
 logger:
   print_freq: 100
-  save_checkpoint_freq: !!float 5e4
+  save_checkpoint_freq: !!float 2e4
