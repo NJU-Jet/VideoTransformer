@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.nn.parallel import DataParallel
-import numpy as np
 
 class My(nn.Module):
     def __init__(self, a):
